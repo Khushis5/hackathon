@@ -1,5 +1,6 @@
-﻿import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { apiFetch } from '../services/api'
 import './Campaigns.css'
 
 const emailTemplates = {
@@ -59,46 +60,8 @@ const malwareTemplates = {
 
 const ransomwareTemplates = { ...malwareTemplates }
 
-const mockEmployees = [
-  { id: 1, name: 'Ava Chen', email: 'ava.chen@company.com', department: 'Engineering', branch: 'Americas' },
-  { id: 2, name: 'Sam Patel', email: 'sam.patel@company.com', department: 'Finance', branch: 'Europe' },
-  { id: 3, name: 'Jordan Lee', email: 'jordan.lee@company.com', department: 'Marketing', branch: 'APAC' },
-  { id: 4, name: 'Taylor Smith', email: 'taylor@company.com', department: 'Engineering', branch: 'Global HQ' },
-  { id: 5, name: 'Casey Johnson', email: 'casey.j@company.com', department: 'HR', branch: 'Global HQ' },
-  { id: 6, name: 'Morgan Davis', email: 'morgan.d@company.com', department: 'IT', branch: 'Americas' },
-  { id: 7, name: 'Riley Chen', email: 'riley.c@company.com', department: 'Finance', branch: 'Europe' },
-  { id: 8, name: 'Alex Brown', email: 'alex.b@company.com', department: 'Executive', branch: 'Global HQ' },
-]
-
-const initialCampaigns = [
-  {
-    id: 1,
-    name: 'Q1 Phishing Test',
-    createdAt: '2026-03-11',
-    branch: 'Global HQ',
-    participants: 327,
-    engaged: 245,
-    clicked: 68,
-    submitted: 34,
-    status: 'active',
-    type: 'Phishing'
-  },
-  {
-    id: 2,
-    name: 'Invoice Scam Simulation',
-    createdAt: '2026-01-18',
-    branch: 'Europe',
-    participants: 118,
-    engaged: 98,
-    clicked: 44,
-    submitted: 18,
-    status: 'completed',
-    type: 'Ransomware'
-  },
-]
-
 export default function Campaigns() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [campaigns, setCampaigns] = useState([])
   const [search, setSearch] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -117,68 +80,80 @@ export default function Campaigns() {
     branch: 'Global HQ',
     type: 'Phishing',
   })
+  
+  // Real employee targets
+  const [mockEmployees, setMockEmployees] = useState([])
 
-  useEffect(() => {
-    const savedCampaigns = localStorage.getItem('campaigns')
-    if (savedCampaigns) {
-      try {
-        const parsed = JSON.parse(savedCampaigns)
-        setCampaigns(parsed.length > 0 ? parsed : initialCampaigns)
-      } catch {
-        setCampaigns(initialCampaigns)
+  const fetchCampaigns = async () => {
+    try {
+      const data = await apiFetch('/campaigns');
+      if (data && data.campaigns) {
+        setCampaigns(data.campaigns);
       }
-    } else {
-      setCampaigns(initialCampaigns)
+    } catch (err) {
+      console.error('Failed to fetch campaigns', err);
     }
-  }, [])
+  }
+
+  const fetchEmployees = async () => {
+    try {
+      const data = await apiFetch('/users');
+      if (data && data.users) {
+        setMockEmployees(data.users);
+      }
+    } catch (err) {
+      console.error('Failed to fetch employees', err);
+    }
+  }
 
   useEffect(() => {
-    if (campaigns.length > 0) {
-      localStorage.setItem('campaigns', JSON.stringify(campaigns))
-    }
-  }, [campaigns])
+    fetchCampaigns()
+    fetchEmployees()
+  }, [])
 
   const filtered = useMemo(() => {
     const lower = search.toLowerCase()
     return campaigns.filter(
       (item) =>
         item.name.toLowerCase().includes(lower) ||
-        item.branch.toLowerCase().includes(lower) ||
+        (item.branch && item.branch.toLowerCase().includes(lower)) ||
         item.status.toLowerCase().includes(lower),
     )
   }, [campaigns, search])
 
-  const handleCreateCampaign = (e) => {
+  const handleCreateCampaign = async (e) => {
     e.preventDefault()
-    const nextId = Math.max(...campaigns.map((c) => c.id)) + 1
-    const campaign = {
-      id: nextId,
-      name: newCampaign.name,
-      createdAt: new Date().toISOString().slice(0, 10),
-      branch: newCampaign.branch,
-      participants: 0,
-      engaged: 0,
-      clicked: 0,
-      submitted: 0,
-      status: 'draft',
-      type: newCampaign.type,
+    try {
+      const data = await apiFetch('/campaigns', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newCampaign.name,
+          type: newCampaign.type.toUpperCase(), // Map frontend types to backend types expected
+          orgId: 'hackathon', // Demo org id
+          branch: newCampaign.branch
+        })
+      });
+      fetchCampaigns();
+      setNewCampaign({ name: '', branch: 'Global HQ', type: 'Phishing' })
+      setShowCreateForm(false)
+    } catch (err) {
+      alert('Failed to create campaign: ' + err.message)
     }
-    setCampaigns((prev) => [campaign, ...prev])
-    setNewCampaign({ name: '', branch: 'Global HQ', type: 'Phishing' })
-    setShowCreateForm(false)
   }
 
   const filteredEmployees = useMemo(() => {
     return mockEmployees.filter(emp => !launchData.selectedEmployees.includes(emp.id))
-  }, [launchData.selectedEmployees])
+  }, [launchData.selectedEmployees, mockEmployees])
 
-  const handleDeleteCampaign = (campaignId) => {
+  const handleDeleteCampaign = async (campaignId) => {
     if (confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
-      const updatedCampaigns = campaigns.filter(c => c.id !== campaignId)
-      setCampaigns(updatedCampaigns)
-      localStorage.setItem('campaigns', JSON.stringify(updatedCampaigns))
-      setSelectedCampaign(null)
-      console.log(`[Campaigns] Deleted campaign ${campaignId}`)
+      try {
+        await apiFetch(`/campaigns/${campaignId}`, { method: 'DELETE' });
+        fetchCampaigns();
+        setSelectedCampaign(null)
+      } catch (err) {
+        alert('Failed to delete campaign: ' + err.message)
+      }
     }
   }
 
@@ -196,77 +171,52 @@ export default function Campaigns() {
     const selectedCount = launchData.selectedEmployees.length
 
     console.log('=========== [Campaigns] CAMPAIGN LAUNCH START ===========')
-    console.log('[Campaigns] Launching campaign:', selectedCampaign)
-    console.log('[Campaigns] Campaign type:', selectedCampaign.type)
-    console.log('[Campaigns] Template ID:', launchData.templateId)
+    
+    try {
+      // First update the campaign with the selected target group and template
+      await apiFetch(`/campaigns/${selectedCampaign.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          targetGroup: launchData.selectedEmployees,
+          templateId: launchData.templateId
+        })
+      });
 
-    if (selectedCampaign.type === 'Ransomware') {
-      // Ransomware: Auto-trigger on next login
-      const pendingRansomware = JSON.parse(localStorage.getItem('pendingRansomware') || '{}')
-      console.log('[Campaigns] Storing ransomware to trigger on login')
-      
-      launchData.selectedEmployees.forEach(userId => {
-        const userKey = String(userId)
-        pendingRansomware[userKey] = {
-          campaignId: selectedCampaign.id,
-          templateId: launchData.templateId,
-          type: 'ransomware',
-          timestamp: Date.now()
-        }
-        console.log(`[Campaigns] Ransomware pending for user ${userKey}`)
-      })
-      
-      localStorage.setItem('pendingRansomware', JSON.stringify(pendingRansomware))
-      console.log('[Campaigns] pendingRansomware saved:', JSON.parse(localStorage.getItem('pendingRansomware')))
-    } else {
-      // Phishing & Malware: Send as emails only
-      console.log(`[Campaigns] Sending ${selectedCampaign.type} emails to ${launchData.selectedEmployees.length} employees`)
-      
-      launchData.selectedEmployees.forEach(userId => {
-        const userKey = String(userId)
-        let body = ''
-        if (selectedCampaign.type === 'Phishing') {
-          body = emailTemplates[launchData.templateId]?.body || 'No message body'
-        } else if (selectedCampaign.type === 'Malware') {
-          body = malwareTemplates[launchData.templateId]?.body || 'No message body'
-        }
-        console.log(`[Campaigns] Email sent for ${selectedCampaign.type} campaign to user ${userKey}`)
-      })
-      
-      console.log('[Campaigns] All emails sent successfully')
+      // Now trigger the actual launch (sends emails)
+      await apiFetch(`/campaigns/${selectedCampaign.id}/launch`, {
+        method: 'POST'
+      });
+
+      // Fallback for ransomware local-popup logic
+      if (selectedCampaign.type === 'Ransomware' || selectedCampaign.type === 'RANSOMWARE') {
+        const pendingRansomware = JSON.parse(localStorage.getItem('pendingRansomware') || '{}')
+        
+        launchData.selectedEmployees.forEach(userId => {
+          const userKey = String(userId)
+          pendingRansomware[userKey] = {
+            campaignId: selectedCampaign.id,
+            templateId: launchData.templateId,
+            type: 'ransomware',
+            timestamp: Date.now()
+          }
+        })
+        localStorage.setItem('pendingRansomware', JSON.stringify(pendingRansomware))
+      }
+
+      fetchCampaigns();
+      setSelectedCampaign({ ...selectedCampaign, status: 'RUNNING' })
+      setShowLaunchForm(false)
+      setShowLaunchConfirm(false)
+      setIsLaunching(false)
+      setLaunchData({ templateId: 'general', selectedEmployees: [], selectedBranch: '', selectedDepartment: '' })
+
+      alert(`Campaign launched successfully! Targeted ${selectedCount} employees via email.`);
+    } catch (err) {
+      setIsLaunching(false)
+      alert('Failed to launch campaign: ' + err.message)
     }
     
     console.log('=========== [Campaigns] CAMPAIGN LAUNCH END ===========')
-
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    const updatedCampaigns = campaigns.map(c => {
-      if (c.id === selectedCampaign.id) {
-        return {
-          ...c,
-          status: 'active',
-          participants: selectedCount,
-          engaged: Math.floor(selectedCount * 0.75),
-          clicked: Math.floor(selectedCount * 0.2),
-          submitted: Math.floor(selectedCount * 0.1)
-        }
-      }
-      return c
-    })
-
-    setCampaigns(updatedCampaigns)
-    setSelectedCampaign({ ...selectedCampaign, status: 'active' })
-    localStorage.setItem('campaigns', JSON.stringify(updatedCampaigns))
-    setShowLaunchForm(false)
-    setShowLaunchConfirm(false)
-    setIsLaunching(false)
-    setLaunchData({ templateId: 'general', selectedEmployees: [], selectedBranch: '', selectedDepartment: '' })
-
-    alert(`Campaign completed! ${
-      selectedCampaign.type === 'Phishing' ? `Emails sent to ${selectedCount} employees.` :
-      selectedCampaign.type === 'Ransomware' ? `Ransomware attack scheduled! System will lock when ${selectedCount} employees next login.` :
-      `Emails sent to ${selectedCount} employees.`
-    }`)
   }
 
   const toggleEmployeeSelection = (empId) => {
@@ -281,7 +231,7 @@ export default function Campaigns() {
   const selectAllInBranch = () => {
     if (!launchData.selectedBranch) return
     const ids = mockEmployees
-      .filter(emp => emp.branch === launchData.selectedBranch && !launchData.selectedEmployees.includes(emp.id))
+      .filter(emp => emp.location === launchData.selectedBranch && !launchData.selectedEmployees.includes(emp.id))
       .map(emp => emp.id)
     setLaunchData(prev => ({ ...prev, selectedEmployees: [...prev.selectedEmployees, ...ids] }))
   }
@@ -298,7 +248,7 @@ export default function Campaigns() {
     if (!launchData.selectedBranch || !launchData.selectedDepartment) return
     const ids = mockEmployees
       .filter(emp =>
-        emp.branch === launchData.selectedBranch &&
+        emp.location === launchData.selectedBranch &&
         emp.department === launchData.selectedDepartment &&
         !launchData.selectedEmployees.includes(emp.id)
       )
@@ -314,8 +264,9 @@ export default function Campaigns() {
 
   const getTemplateSets = () => {
     if (!selectedCampaign) return {}
-    if (selectedCampaign.type === 'Phishing') return emailTemplates
-    if (selectedCampaign.type === 'Ransomware') return ransomwareTemplates
+    const cType = selectedCampaign.type?.toUpperCase();
+    if (cType === 'PHISHING' || cType === 'CREDENTIAL_HARVEST') return emailTemplates
+    if (cType === 'RANSOMWARE') return ransomwareTemplates
     return malwareTemplates
   }
 
@@ -335,9 +286,11 @@ export default function Campaigns() {
               onChange={(e) => setSearch(e.target.value)}
               className="campaigns__search-input"
             />
-            <button className="button button--primary" onClick={() => setShowCreateForm(!showCreateForm)}>
-              {showCreateForm ? 'Cancel' : '+ New Campaign'}
-            </button>
+            {isAdmin && (
+              <button className="button button--primary" onClick={() => setShowCreateForm(!showCreateForm)}>
+                {showCreateForm ? 'Cancel' : '+ New Campaign'}
+              </button>
+            )}
           </div>
         </header>
 
@@ -388,21 +341,21 @@ export default function Campaigns() {
                   <h3>{c.name}</h3>
                   <p className="campaign-card__type">{c.type} · {c.branch}</p>
                 </div>
-                <span className={`badge badge--${c.status}`}>{c.status}</span>
+                <span className={`badge badge--${c.status.toLowerCase()}`}>{c.status}</span>
               </div>
 
               <div className="campaign-card__stats">
                 <div className="stat">
                   <span>Participants</span>
-                  <strong>{c.participants}</strong>
+                  <strong>{c.targetGroup?.length || c.participants || 0}</strong>
                 </div>
                 <div className="stat">
                   <span>Clicked</span>
-                  <strong>{c.clicked}</strong>
+                  <strong>{c.clicked || 0}</strong>
                 </div>
                 <div className="stat">
                   <span>Submitted</span>
-                  <strong>{c.submitted}</strong>
+                  <strong>{c.submitted || 0}</strong>
                 </div>
               </div>
 
@@ -414,6 +367,18 @@ export default function Campaigns() {
                 >
                   View Details
                 </button>
+                {isAdmin && (c.status.toLowerCase() === 'draft' || c.status.toLowerCase() === 'pending') && (
+                  <button
+                    className="campaign-card__action"
+                    style={{ background: 'rgba(0, 212, 255, 0.1)', marginLeft: '0.5rem' }}
+                    onClick={() => {
+                      setSelectedCampaign(c);
+                      setShowLaunchForm(true);
+                    }}
+                  >
+                    🚀 Launch
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -442,7 +407,7 @@ export default function Campaigns() {
                   <div className="detail-item">
                     <span className="detail-label">Status</span>
                     <span className="detail-value">
-                      <span className={`badge badge--${selectedCampaign.status}`}>{selectedCampaign.status}</span>
+                        <span className={`badge badge--${selectedCampaign.status.toLowerCase()}`}>{selectedCampaign.status}</span>
                     </span>
                   </div>
                   <div className="detail-item">
@@ -465,22 +430,22 @@ export default function Campaigns() {
                 <div className="details-metrics">
                   <div className="metric-card">
                     <span className="metric-label">Participants</span>
-                    <span className="metric-value">{selectedCampaign.participants}</span>
+                    <span className="metric-value">{selectedCampaign.targetGroup?.length || selectedCampaign.participants || 0}</span>
                     <span className="metric-desc">Total targeted</span>
                   </div>
                   <div className="metric-card">
                     <span className="metric-label">Engaged</span>
-                    <span className="metric-value">{selectedCampaign.engaged}</span>
+                    <span className="metric-value">{selectedCampaign.engaged || 0}</span>
                     <span className="metric-desc">Opened email</span>
                   </div>
                   <div className="metric-card">
                     <span className="metric-label">Clicked</span>
-                    <span className="metric-value">{selectedCampaign.clicked}</span>
+                    <span className="metric-value">{selectedCampaign.clicked || 0}</span>
                     <span className="metric-desc">Clicked link</span>
                   </div>
                   <div className="metric-card">
                     <span className="metric-label">Submitted</span>
-                    <span className="metric-value">{selectedCampaign.submitted}</span>
+                    <span className="metric-value">{selectedCampaign.submitted || 0}</span>
                     <span className="metric-desc">Entered credentials</span>
                   </div>
                 </div>
@@ -492,9 +457,9 @@ export default function Campaigns() {
                   <div className="insight-item">
                     <span className="insight-icon">▸</span>
                     <span>
-                      {selectedCampaign.status === 'active'
+                      {selectedCampaign.status.toLowerCase() === 'active' || selectedCampaign.status.toLowerCase() === 'running'
                         ? 'Campaign is currently running. Monitor engagement in real-time.'
-                        : selectedCampaign.status === 'completed'
+                        : selectedCampaign.status.toLowerCase() === 'completed'
                         ? 'Campaign completed. Review results for security training opportunities.'
                         : 'Campaign is in draft status. Configure and launch when ready.'}
                     </span>
@@ -515,18 +480,20 @@ export default function Campaigns() {
 
             <div className="campaign-details__footer">
               <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-                <button 
-                  className="details-btn details-btn--danger" 
-                  onClick={() => handleDeleteCampaign(selectedCampaign.id)}
-                  style={{
-                    background: 'rgba(255, 100, 100, 0.2)',
-                    color: '#ff6464',
-                    border: '2px solid #ff6464',
-                    flex: 1
-                  }}
-                >
-                  🗑️ Delete Campaign
-                </button>
+                {isAdmin && (
+                  <button 
+                    className="details-btn details-btn--danger" 
+                    onClick={() => handleDeleteCampaign(selectedCampaign.id)}
+                    style={{
+                      background: 'rgba(255, 100, 100, 0.2)',
+                      color: '#ff6464',
+                      border: '2px solid #ff6464',
+                      flex: 1
+                    }}
+                  >
+                    🗑️ Delete Campaign
+                  </button>
+                )}
                 <button 
                   className="details-btn details-btn--secondary" 
                   onClick={() => setSelectedCampaign(null)}
@@ -534,7 +501,7 @@ export default function Campaigns() {
                 >
                   Close
                 </button>
-                {selectedCampaign.status === 'draft' && (
+                {isAdmin && (selectedCampaign.status.toLowerCase() === 'draft' || selectedCampaign.status.toLowerCase() === 'pending') && (
                   <button 
                     className="details-btn details-btn--primary" 
                     onClick={() => setShowLaunchForm(true)}

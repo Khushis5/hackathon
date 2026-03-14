@@ -60,9 +60,10 @@ export function AuthProvider({ children }) {
       logout: () => {
         setUser(null)
         setActiveSimulation(null) // Clear simulation on logout
+        localStorage.removeItem('accessToken')
       },
       isAuthenticated: Boolean(user),
-      isAdmin: user?.role === 'admin',
+      isAdmin: user?.role === 'admin' || user?.role === 'SUPER_ADMIN',
       activeSimulation,
       setActiveSimulation,
       clearSimulation: () => setActiveSimulation(null),

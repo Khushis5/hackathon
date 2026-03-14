@@ -1,13 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
+import { apiFetch } from '../services/api'
 import './Users.css'
-
-const mockUsers = [
-  { id: 1, name: 'Ava Chen', email: 'ava.chen@company.com', department: 'Engineering', location: 'New York', status: 'Active', riskScore: 35 },
-  { id: 2, name: 'Sam Patel', email: 'sam.patel@company.com', department: 'Finance', location: 'London', status: 'Active', riskScore: 62 },
-  { id: 3, name: 'Jordan Lee', email: 'jordan.lee@company.com', department: 'Marketing', location: 'Singapore', status: 'Active', riskScore: 48 },
-  { id: 4, name: 'Taylor Smith', email: 'taylor@company.com', department: 'Engineering', location: 'Toronto', status: 'Active', riskScore: 28 },
-  { id: 5, name: 'Casey Johnson', email: 'casey.j@company.com', department: 'HR', location: 'Network', status: 'Active', riskScore: 71 },
-]
 
 export default function Users() {
   const [users, setUsers] = useState([])
@@ -22,29 +15,20 @@ export default function Users() {
   })
   const [errors, setErrors] = useState({})
 
-  // Load users from localStorage on mount
-  useEffect(() => {
-    const savedUsers = localStorage.getItem('users')
-    if (savedUsers) {
-      try {
-        const parsed = JSON.parse(savedUsers)
-        setUsers(parsed.length > 0 ? parsed : mockUsers)
-      } catch (error) {
-        console.error('Error loading users from localStorage:', error)
-        setUsers(mockUsers)
+  const fetchUsers = async () => {
+    try {
+      const data = await apiFetch('/users')
+      if (data && data.users) {
+        setUsers(data.users)
       }
-    } else {
-      setUsers(mockUsers)
+    } catch (err) {
+      console.error('Failed to fetch users:', err)
     }
-  }, [])
+  }
 
-  // Save users to localStorage whenever users change (but not on initial load)
   useEffect(() => {
-    // Only save if users is not empty (to avoid saving empty array on mount)
-    if (users.length > 0) {
-      localStorage.setItem('users', JSON.stringify(users))
-    }
-  }, [users])
+    fetchUsers()
+  }, [])
 
   const filtered = useMemo(() => {
     const lower = query.toLowerCase()
@@ -76,31 +60,46 @@ export default function Users() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleAddEmployee = (e) => {
+  const handleAddEmployee = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
 
-    const newEmployee = {
-      id: Math.max(...users.map(u => u.id), 0) + 1,
-      ...formData,
-      riskScore: 0,
-      status: 'Active'
+    try {
+      // The backend expects password for registration. We'll generate a dummy one since this is an employee creation simulation
+      await apiFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: 'securePassword123!',
+          role: 'ANALYST',
+          department: formData.department,
+          location: formData.location
+        })
+      });
+      
+      setFormData({
+        name: '',
+        email: '',
+        department: 'Engineering',
+        location: ''
+      })
+      setErrors({})
+      setShowForm(false)
+      fetchUsers() // Refresh list
+    } catch (err) {
+      setErrors({ email: err.message || 'Failed to create employee' })
     }
-
-    setUsers([...users, newEmployee])
-    setFormData({
-      name: '',
-      email: '',
-      department: 'Engineering',
-      location: ''
-    })
-    setErrors({})
-    setShowForm(false)
   }
 
-  const handleDeleteEmployee = (id) => {
+  const handleDeleteEmployee = async (id) => {
     if (window.confirm('Are you sure you want to remove this employee?')) {
-      setUsers(users.filter(u => u.id !== id))
+      try {
+        await apiFetch(`/users/${id}`, { method: 'DELETE' })
+        fetchUsers() // Refresh list
+      } catch (err) {
+        alert('Failed to delete employee: ' + err.message)
+      }
     }
   }
 

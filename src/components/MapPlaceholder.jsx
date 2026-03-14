@@ -19,6 +19,27 @@ const attackLocations = [
   { lat: -33.8688, lng: 151.2093, city: 'Sydney', attacks: 6, status: 'Monitoring' },
 ]
 
+const createCustomIcon = (status) => {
+  let color = '#00d4ff'; // Default Monitoring (Cyan)
+  if (status === 'Active') color = '#ff4444';     // Red
+  if (status === 'High Risk') color = '#ffaa00'; // Yellow
+  if (status === 'Low Risk') color = '#44ff44';  // Green
+
+  return L.divIcon({
+    className: 'custom-pin',
+    html: `<div style="
+      background-color: ${color};
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 10px ${color};
+    "></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+  });
+}
+
 export default function MapPlaceholder() {
   return (
     <section className="map-placeholder">
@@ -30,12 +51,20 @@ export default function MapPlaceholder() {
             attribution='&copy; OpenStreetMap contributors'
           />
           {attackLocations.map((location, idx) => (
-            <Marker key={idx} position={[location.lat, location.lng]}>
+            <Marker 
+              key={idx} 
+              position={[location.lat, location.lng]}
+              icon={createCustomIcon(location.status)}
+            >
               <Popup>
                 <div className="popup-content">
                   <h4>{location.city}</h4>
                   <p>Attacks: {location.attacks}</p>
-                  <p>Status: <strong>{location.status}</strong></p>
+                  <p>Status: <strong style={{ color: 
+                    location.status === 'Active' ? '#ff4444' : 
+                    location.status === 'High Risk' ? '#ffaa00' : 
+                    location.status === 'Low Risk' ? '#44ff44' : '#00d4ff' 
+                  }}>{location.status}</strong></p>
                 </div>
               </Popup>
             </Marker>

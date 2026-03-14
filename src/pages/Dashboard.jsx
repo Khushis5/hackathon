@@ -3,10 +3,29 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useAuth } from '../contexts/AuthContext'
 import LiveFeed from '../components/LiveFeed'
 import MapPlaceholder from '../components/MapPlaceholder'
+import { apiFetch } from '../services/api'
 import './Dashboard.css'
 
 export default function Dashboard() {
   const { isAdmin } = useAuth()
+  
+  const [adminStats, setAdminStats] = useState({ activeIncidents: 3, ongoingCampaigns: 1, avgRiskScore: 47 })
+
+  useEffect(() => {
+    if (isAdmin) {
+      apiFetch('/analytics/dashboard')
+        .then(data => {
+          if (data && data.stats) {
+             setAdminStats({
+               activeIncidents: data.stats.trackingStats.clickEvents + data.stats.trackingStats.submitEvents,
+               ongoingCampaigns: data.stats.overview.activeCampaigns,
+               avgRiskScore: Math.round(data.stats.riskScore)
+             })
+          }
+        })
+        .catch(err => console.error("Failed to load dashboard stats", err))
+    }
+  }, [isAdmin])
 
   if (isAdmin) {
     // Admin Dashboard
@@ -15,17 +34,17 @@ export default function Dashboard() {
         <section className="dashboard__overview">
           <div className="dashboard__card">
             <h3>Active incidents</h3>
-            <p className="dashboard__value">3</p>
+            <p className="dashboard__value">{adminStats.activeIncidents}</p>
             <p className="dashboard__meta">Currently tracked across branches</p>
           </div>
           <div className="dashboard__card">
             <h3>Ongoing campaigns</h3>
-            <p className="dashboard__value">1</p>
+            <p className="dashboard__value">{adminStats.ongoingCampaigns}</p>
             <p className="dashboard__meta">Phishing test in progress</p>
           </div>
           <div className="dashboard__card">
             <h3>Average risk score</h3>
-            <p className="dashboard__value">47%</p>
+            <p className="dashboard__value">{adminStats.avgRiskScore}%</p>
             <p className="dashboard__meta">Company-wide threshold: 65%</p>
           </div>
         </section>

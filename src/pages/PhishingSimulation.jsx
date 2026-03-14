@@ -9,9 +9,10 @@ export default function PhishingSimulation() {
   const [showCredentialForm, setShowCredentialForm] = useState(false)
   const [credentials, setCredentials] = useState({ username: '', password: '' })
 
-  const userId = activeSimulation?.userId || user?.id
-  const campaignId = activeSimulation?.campaignId
-  const templateId = activeSimulation?.templateId || 'general'
+  const queryParams = new URLSearchParams(window.location.search)
+  const userId = activeSimulation?.userId || queryParams.get('u') || user?.id
+  const campaignId = activeSimulation?.campaignId || queryParams.get('c')
+  const templateId = activeSimulation?.templateId || queryParams.get('t') || 'general'
 
   const phishingTemplates = {
     general: {

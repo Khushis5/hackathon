@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { apiFetch } from '../services/api'
 import './Login.css'
 
 export default function Login() {
@@ -10,31 +11,33 @@ export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     if (!username.trim() || !password.trim()) {
       setError('Please enter a username and password.')
       return
     }
-    // Placeholder: Replace with real authentication API
-    // Map username to employee ID for demo purposes
-    const mockUserMapping = {
-      'ava': { id: 1, name: 'Ava Chen', username: 'ava' },
-      'sam': { id: 2, name: 'Sam Patel', username: 'sam' },
-      'jordan': { id: 3, name: 'Jordan Lee', username: 'jordan' },
-      'taylor': { id: 4, name: 'Taylor Smith', username: 'taylor' },
-      'casey': { id: 5, name: 'Casey Johnson', username: 'casey' },
-      'morgan': { id: 6, name: 'Morgan Davis', username: 'morgan' },
-      'riley': { id: 7, name: 'Riley Chen', username: 'riley' },
-      'alex': { id: 8, name: 'Alex Brown', username: 'alex' },
-    }
     
-    const userData = mockUserMapping[username.trim().toLowerCase()] || { id: 1, name: 'Ava Chen', username: username.trim() }
-    login({ ...userData, role: 'user' })
-    navigate('/dashboard')
+    try {
+      // Create email mapping for the demo users to actual backend emails
+      // If user inputs "ava", map it to "ava@example.com"
+      const email = username.includes('@') ? username : `${username.toLowerCase().trim()}@example.com`
+
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      })
+
+      localStorage.setItem('accessToken', data.accessToken)
+      login(data.user)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.message || 'Authentication failed. Please check your credentials.')
+    }
   }
 
   return (
+
     <div className="login">
       <div className="login__card">
         <h1>Employee Login</h1>

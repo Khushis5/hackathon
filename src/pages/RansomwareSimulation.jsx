@@ -9,9 +9,10 @@ export default function RansomwareSimulation() {
   const [userAction, setUserAction] = useState('')
   const [encryptedFiles, setEncryptedFiles] = useState(0)
 
-  const userId = activeSimulation?.userId
-  const campaignId = activeSimulation?.campaignId
-  const templateId = activeSimulation?.templateId || 'ransomware'
+  const queryParams = new URLSearchParams(window.location.search)
+  const userId = activeSimulation?.userId || queryParams.get('u')
+  const campaignId = activeSimulation?.campaignId || queryParams.get('c')
+  const templateId = activeSimulation?.templateId || queryParams.get('t') || 'ransomware'
 
   // Simulate file encryption counter
   useEffect(() => {
