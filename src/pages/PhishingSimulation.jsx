@@ -78,17 +78,51 @@ export default function PhishingSimulation() {
     }
   }
 
-  const handleSubmitCredentials = (e) => {
+  const handleSubmitCredentials = async (e) => {
     e.preventDefault()
     deleteMessage()
     setUserAction('Entered Credentials')
     setShowResult(true)
+    
+    // Log tracking event
+    try {
+      if (campaignId && userId) {
+        const { apiFetch } = await import('../services/api')
+        await apiFetch('/tracking/track', {
+          method: 'POST',
+          body: JSON.stringify({
+            campaignId,
+            userId,
+            eventType: 'CREDENTIALS_SUBMITTED'
+          })
+        })
+      }
+    } catch (err) {
+      console.error('Failed to track credentials submission', err)
+    }
   }
 
-  const handleReportPhishing = () => {
+  const handleReportPhishing = async () => {
     deleteMessage()
     setUserAction('Reported Phishing')
     setShowResult(true)
+    
+    // Log tracking event
+    try {
+      if (campaignId && userId) {
+        const { apiFetch } = await import('../services/api')
+        await apiFetch('/tracking/track', {
+          method: 'POST',
+          body: JSON.stringify({
+            campaignId,
+            userId,
+            eventType: 'REPORTED_PHISHING'
+          })
+        })
+      }
+    } catch (err) {
+      console.error('Failed to track phishing report', err)
+    }
   }
 
   const handleDeleteEmail = () => {

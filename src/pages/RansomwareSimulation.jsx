@@ -53,18 +53,30 @@ export default function RansomwareSimulation() {
     setUserAction(action)
     setShowResult(true)
 
-    // Log the event
-    const eventData = {
-      event_type: `ransomware_${action.toLowerCase().replace(/ /g, '_')}`,
-      user_id: userId,
-      campaign_id: campaignId,
-      template_id: templateId,
-      encrypted_files: encryptedFiles,
-      timestamp: new Date().toISOString(),
-      simulation: true
-    }
+    // Log tracking event
+    try {
+      if (campaignId && userId) {
+        const { apiFetch } = await import('../services/api')
+        
+        let eventType = 'LINK_CLICKED'
+        if (action === 'Keep Working') {
+          eventType = 'CREDENTIALS_SUBMITTED' // Generic "failed" event
+        } else if (action.includes('Call') || action.includes('Isolate')) {
+          eventType = 'REPORTED_PHISHING' // Successful response
+        }
 
-    console.log('Logging ransomware event:', eventData)
+        await apiFetch('/tracking/track', {
+          method: 'POST',
+          body: JSON.stringify({
+            campaignId,
+            userId,
+            eventType
+          })
+        })
+      }
+    } catch (err) {
+      console.error('Failed to track ransomware simulation event', err)
+    }
 
     // Clear the simulation
     clearSimulation()

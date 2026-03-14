@@ -74,66 +74,100 @@ export const launchCampaign = async (id) => {
         : db.collection('users');
       
       // Create attack-specific email templates
+      // Detailed templates for each attack type
+      const templates = {
+        PHISHING: {
+          hr: {
+            subject: 'Action Required: Update Your Employee Profile',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px;">
+              <p>Dear ${user.name},</p>
+              <p>Please click the link below to verify and update your employee profile information. This is required for our upcoming HR system migration.</p>
+              <p><a href="${link}" style="background: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Update Profile</a></p>
+              <p>Best regards,<br/>Human Resources Team</p>
+            </div>`
+          },
+          it: {
+            subject: 'Security Alert: Update Your Password Now',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px;">
+              <p>Dear Employee,</p>
+              <p>We detected suspicious activity on your account. Please click below to verify your credentials and secure your account immediately.</p>
+              <p><a href="${link}" style="background: #e74c3c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Verify Credentials</a></p>
+              <p>If you did not request this, please contact IT.<br/>IT Security Team</p>
+            </div>`
+          },
+          finance: {
+            subject: 'Invoice Verification Required',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px;">
+              <p>Dear Colleague,</p>
+              <p>We need you to verify an outstanding invoice. Please click the link below to review and confirm payment details.</p>
+              <p><a href="${link}" style="background: #27ae60; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Review Invoice</a></p>
+              <p>Thank you,<br/>Finance Department</p>
+            </div>`
+          },
+          general: {
+            subject: 'Important: System Maintenance Notice',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px;">
+              <p>Dear Team,</p>
+              <p>We will be performing critical system maintenance this weekend. Click below to download the maintenance schedule and FAQs.</p>
+              <p><a href="${link}" style="background: #7f8c8d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Download Schedule</a></p>
+              <p>Thank you for your patience,<br/>IT Operations</p>
+            </div>`
+          }
+        },
+        MALWARE: {
+          trojan: {
+            subject: 'Important: System Security Update Required',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px;">
+              <p>Dear ${user.name},</p>
+              <p>Our IT department has detected a potential security vulnerability on your workstation.</p>
+              <p>Please download and run the attached Security_Scanner.exe to check for any issues.</p>
+              <p><a href="${link}" style="color: #0066cc; font-weight: bold; text-decoration: underline;">Download Security_Scanner.exe (2.4 MB)</a></p>
+              <p>Best regards,<br/>IT Security Team</p>
+            </div>`
+          },
+          keylogger: {
+            subject: 'New Employee Handbook - Please Review',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px;">
+              <p>Dear Team Member,</p>
+              <p>We have updated our employee handbook with new policies and procedures for 2026.</p>
+              <p>Please download and review the attached Employee_Handbook_2026.pdf.</p>
+              <p><a href="${link}" style="color: #0066cc; font-weight: bold; text-decoration: underline;">Employee_Handbook_2026.pdf</a></p>
+              <p>Thank you,<br/>HR Department</p>
+            </div>`
+          }
+        },
+        RANSOMWARE: {
+          ransomware: {
+            subject: 'Critical: Data Backup Verification Required',
+            html: (user, link) => `<div style="font-family: sans-serif; padding: 20px; border: 2px solid #c0392b;">
+              <h2 style="color: #c0392b;">⚠️ Urgent Action Needed</h2>
+              <p>Dear ${user.name},</p>
+              <p>As part of our new data protection policy, please authorize a backup verification on your workstation.</p>
+              <p>Failure to verify by the end of today will result in temporary account lockout for security reasons.</p>
+              <p><a href="${link}" style="background: #c0392b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">Authorize Backup Verification</a></p>
+              <p>Best regards,<br/>Data Protection Team</p>
+            </div>`
+          }
+        }
+      };
+
       const getAttackTemplate = (user, campaign) => {
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
         const trackingLink = `${backendUrl}/api/tracking/click?c=${id}&u=${user.id}`;
         const type = campaign.type.toUpperCase();
+        const templateId = (campaign.templateId || 'general').toLowerCase();
 
-        if (type.includes('PHISHING')) {
-          return {
-            subject: 'Action Required: Verify Your IT Credentials',
-            html: `
-              <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                  <h2 style="color: #2c3e50;">Security Notification</h2>
-                </div>
-                <p>Dear ${user.name},</p>
-                <p>Our security systems have flagged a potential synchronization issue with your corporate account.</p>
-                <p>To prevent access lockout, please verify your credentials through our secure portal immediately:</p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${trackingLink}" style="background-color: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify My Account</a>
-                </div>
-                <p style="color: #7f8c8d; font-size: 0.9em;">Security Code: REF-${id.substring(0, 8).toUpperCase()}</p>
-                <p>Thank you,<br/>IT Security Operations Team</p>
-              </div>
-            `
-          };
-        }
+        // Find the right category (Phishing, Malware, Ransomware)
+        let category = 'PHISHING';
+        if (type.includes('MALWARE')) category = 'MALWARE';
+        if (type.includes('RANSOMWARE')) category = 'RANSOMWARE';
 
-        if (type.includes('MALWARE')) {
-          return {
-            subject: 'Urgent: Invoice INV-88293 Payment Overdue',
-            html: `
-              <div style="font-family: Arial, sans-serif; color: #333;">
-                <p>Hello,</p>
-                <p>Attached is the overdue invoice for your recent service request. Please review the details and process payment by the end of the business day to avoid service interruption.</p>
-                <p>You can download a digital copy of the invoice below:</p>
-                <p><a href="${trackingLink}" style="color: #0066cc; font-weight: bold; text-decoration: underline;">Download_Invoice_INV88293.pdf.exe</a> (2.4 MB)</p>
-                <p>Regards,<br/>Accounts Payable Department</p>
-              </div>
-            `
-          };
-        }
-
-        if (type.includes('RANSOMWARE')) {
-          return {
-            subject: 'CRITICAL: Unauthorized Data Access Detected',
-            html: `
-              <div style="background-color: #f8d7da; padding: 20px; border: 1px solid #f5c6cb; font-family: sans-serif;">
-                <h2 style="color: #721c24; margin-top: 0;">⚠️ Security Breach Alert</h2>
-                <p>System monitoring has detected an unauthorized attempt to access sensitive files on your workstation.</p>
-                <p><strong>Incident ID:</strong> ${id}</p>
-                <p>We are initiating an emergency security scan and system lock. Please click below to authorize the scan and prevent data encryption:</p>
-                <p><a href="${trackingLink}" style="background-color: #721c24; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 4px;">Run Emergency Security Scan</a></p>
-                <p style="font-size: 0.8em; color: #666;">If no action is taken within 10 minutes, your system will be automatically isolated from the network.</p>
-              </div>
-            `
-          };
-        }
+        const templateSet = templates[category] || templates.PHISHING;
+        const selectedTemplate = templateSet[templateId] || Object.values(templateSet)[0];
 
         return {
-          subject: 'Important Security Update',
-          html: `<p>Dear ${user.name}, please click <a href="${trackingLink}">here</a> to verify your account.</p>`
+          subject: selectedTemplate.subject,
+          html: selectedTemplate.html(user, trackingLink)
         };
       };
 

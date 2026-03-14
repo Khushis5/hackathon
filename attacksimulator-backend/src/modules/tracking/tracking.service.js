@@ -11,6 +11,26 @@ export const trackEvent = async (data) => {
     createdAt: new Date().toISOString()
   };
   const ref = await db.collection('tracking').add(event);
+
+  // Update campaign stats in real-time
+  const campaignRef = db.collection('campaigns').doc(data.campaignId);
+  const campaignDoc = await campaignRef.get();
+
+  if (campaignDoc.exists) {
+    const updates = {};
+    if (data.eventType === 'LINK_CLICKED') {
+      updates.clicked = (campaignDoc.data().clicked || 0) + 1;
+    } else if (data.eventType === 'CREDENTIALS_SUBMITTED') {
+      updates.submitted = (campaignDoc.data().submitted || 0) + 1;
+    } else if (data.eventType === 'EMAIL_OPENED') {
+      updates.engaged = (campaignDoc.data().engaged || 0) + 1;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      await campaignRef.update(updates);
+    }
+  }
+
   return { id: ref.id, ...event };
 };
 
