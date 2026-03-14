@@ -1,0 +1,128 @@
+/* Reports Page Styles */
+.reports {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.reports__header {
+  margin-bottom: 2rem;
+}
+
+.reports__header h2 {
+  font-size: 1.8rem;
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+}
+
+.reports__header p {
+  color: #666;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  font-size: 0.85rem;
+}
+
+.reports__section {
+  background: transparent;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 4px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: none;
+}
+
+.reports__section h3 {
+  margin: 0 0 1.5rem 0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.reports__controls {
+  margin-bottom: 1.5rem;
+}
+
+.reports__controls label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #888;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  font-size: 0.85rem;
+}
+
+.reports__controls select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: transparent;
+  color: #aaa;
+  transition: all 0.3s;
+}
+
+.reports__controls select:focus {
+  outline: none;
+  border-color: rgba(0, 212, 255, 0.5);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.reports__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
+
+.reports__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.reports__bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.reports__label {
+  min-width: 120px;
+  font-weight: 400;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.reports__barContainer {
+  flex: 1;
+  height: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.reports__barFill {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #00ff44);
+  color: #0a0a0a;
+  padding-right: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.reports__barValue {
+  color: #0a0a0a;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

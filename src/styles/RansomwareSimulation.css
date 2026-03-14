@@ -1,0 +1,385 @@
+/* Ransomware Simulation Styles */
+.ransomware-simulation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.95);
+  font-family: 'Courier New', monospace;
+}
+
+.ransomware-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.ransomware-panel {
+  background: #000;
+  border: 3px solid #ff0000;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+  animation: ransomwareAlert 0.5s ease-out;
+}
+
+@keyframes ransomwareAlert {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ransomware-header {
+  background: linear-gradient(45deg, #ff0000, #cc0000);
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 2px solid #ff0000;
+}
+
+.ransomware-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.ransomware-header h1 {
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 2px;
+}
+
+.ransomware-content {
+  padding: 2rem;
+  color: #fff;
+}
+
+.encryption-notice {
+  margin-bottom: 2rem;
+}
+
+.warning-text {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: #ffcccc;
+  text-align: center;
+}
+
+.ransom-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff0000;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .ransom-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ransom-amount h2 {
+  color: #ffff00;
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.ransom-amount p {
+  color: #ccc;
+  text-align: center;
+  margin: 0;
+}
+
+.countdown h3 {
+  color: #ffcccc;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.countdown-timer {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #ff0000;
+  text-align: center;
+  background: #000;
+  border: 2px solid #ff0000;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  animation: countdownPulse 1s infinite;
+}
+
+@keyframes countdownPulse {
+  0%, 100% {
+    border-color: #ff0000;
+  }
+  50% {
+    border-color: #ff4444;
+  }
+}
+
+.countdown-warning {
+  color: #ffaaaa;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+}
+
+.ransomware-instructions {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}
+
+.ransomware-instructions h3 {
+  color: #ffcccc;
+  margin: 0 0 1rem 0;
+}
+
+.ransomware-instructions ol {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.ransomware-instructions li {
+  margin-bottom: 0.5rem;
+  color: #ccc;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.ransomware-btn {
+  padding: 1rem 1.5rem;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  font-family: inherit;
+}
+
+.ransomware-btn.report {
+  background: #006600;
+  border-color: #00aa00;
+  color: #fff;
+}
+
+.ransomware-btn.report:hover {
+  background: #00aa00;
+  transform: translateY(-2px);
+}
+
+.ransomware-btn.ignore {
+  background: #666600;
+  border-color: #aaaa00;
+  color: #fff;
+}
+
+.ransomware-btn.ignore:hover {
+  background: #aaaa00;
+  transform: translateY(-2px);
+}
+
+.ransomware-btn.pay {
+  background: #660000;
+  border-color: #aa0000;
+  color: #fff;
+}
+
+.ransomware-btn.pay:hover {
+  background: #aa0000;
+  transform: translateY(-2px);
+}
+
+.ransomware-btn.close {
+  background: #333;
+  border-color: #666;
+  color: #fff;
+}
+
+.ransomware-btn.close:hover {
+  background: #666;
+  transform: translateY(-2px);
+}
+
+.simulation-notice {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 0, 0.1);
+  border: 1px solid #ffff00;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.simulation-notice p {
+  color: #ffff00;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+/* Result Panel Styles */
+.result-panel {
+  max-width: 600px;
+}
+
+.result-header {
+  background: linear-gradient(45deg, #00aa00, #006600);
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 2px solid #00aa00;
+}
+
+.result-header .result-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.result-header h1 {
+  color: #fff;
+  font-size: 2rem;
+  margin: 0;
+  font-family: inherit;
+}
+
+.result-content {
+  padding: 2rem;
+}
+
+.result-message {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #ccffcc;
+}
+
+.result-details {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #00aa00;
+  border-radius: 8px;
+}
+
+.result-details h3 {
+  color: #aaffaa;
+  margin: 0 0 1rem 0;
+}
+
+.response-reported {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.response-ignored,
+.response-closed {
+  color: #ffaa00;
+  font-weight: bold;
+}
+
+.response-payment {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.correct-action {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 255, 0.1);
+  border: 1px solid #00aaff;
+  border-radius: 8px;
+}
+
+.correct-action h3 {
+  color: #aaffff;
+  margin: 0 0 1rem 0;
+}
+
+.correct-action p {
+  color: #ccffff;
+  margin: 0;
+}
+
+.result-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.result-btn {
+  padding: 1rem 2rem;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.result-btn.primary {
+  background: #006600;
+  border-color: #00aa00;
+  color: #fff;
+}
+
+.result-btn.primary:hover {
+  background: #00aa00;
+  transform: translateY(-2px);
+}
+
+.result-btn.secondary {
+  background: #333;
+  border-color: #666;
+  color: #fff;
+}
+
+.result-btn.secondary:hover {
+  background: #666;
+  transform: translateY(-2px);
+}

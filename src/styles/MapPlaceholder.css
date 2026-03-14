@@ -1,0 +1,81 @@
+/* MapPlaceholder Component Styles */
+.map-placeholder {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-placeholder h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+  font-size: 1.125rem;
+}
+
+.map-container {
+  flex: 1;
+  min-height: 400px;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.popup-content {
+  padding: 0.75rem;
+}
+
+.popup-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+}
+
+.popup-content p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.popup-content strong {
+  color: #1f2937;
+}
+
+.map-legend {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.legend-item span {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.legend-item .active {
+  background: #ef4444;
+}
+
+.legend-item .warning {
+  background: #f97316;
+}
+
+.legend-item .safe {
+  background: #22c55e;
+}

@@ -1,0 +1,140 @@
+// Shared mock data used across user dashboard pages.
+
+export const mockUserStats = {
+  simulationsParticipated: 12,
+  phishingLinksClicked: 3,
+  attacksReported: 8,
+  riskScore: 'Medium',
+  riskScoreValue: 65,
+  safeActions: 9,
+  totalPoints: 1250,
+}
+
+export const mockActivityHistory = [
+  {
+    id: 1,
+    campaignName: 'Password Reset Campaign',
+    attackType: 'Phishing',
+    action: 'Clicked phishing link',
+    result: 'Security warning displayed - Points: -3',
+    timestamp: new Date(Date.now() - 86400000 * 2),
+    status: 'failed',
+  },
+  {
+    id: 2,
+    campaignName: 'Payroll Update Malware Test',
+    attackType: 'Malware',
+    action: 'Downloaded and executed file',
+    result: 'Malware simulation triggered - Points: -4',
+    timestamp: new Date(Date.now() - 86400000),
+    status: 'failed',
+  },
+  {
+    id: 3,
+    campaignName: 'CEO Email Phishing',
+    attackType: 'Phishing',
+    action: 'Reported suspicious email',
+    result: 'Correct action taken - Points: +3',
+    timestamp: new Date(Date.now() - 3600000),
+    status: 'success',
+  },
+  {
+    id: 4,
+    campaignName: 'Ransomware Alert Training',
+    attackType: 'Ransomware',
+    action: 'Reported incident immediately',
+    result: 'Excellent response - Points: +5',
+    timestamp: new Date(Date.now() - 1800000),
+    status: 'success',
+  },
+]
+
+export const mockTrainingRecommendations = [
+  {
+    id: 1,
+    title: 'Advanced Phishing Detection',
+    description: 'Learn to identify sophisticated phishing attempts including spear-phishing and business email compromise.',
+    icon: '🎣',
+    progress: 75,
+    estimatedTime: '45 min',
+    course: 'Phishing Prevention 301',
+    completedSections: 6,
+    totalSections: 8,
+    sections: ['Email Headers', 'Sender Verification', 'Suspicious Links', 'Attachment Analysis', 'Grammar & Urgency Tactics', 'Real-world Examples'],
+    enrolledDate: '2026-02-15',
+    deadline: '2026-04-01',
+  },
+  {
+    id: 2,
+    title: 'Safe File Handling Practices',
+    description: 'Master secure file download, execution, and malware recognition techniques.',
+    icon: '🛡️',
+    progress: 60,
+    estimatedTime: '30 min',
+    course: 'Malware Awareness 201',
+    completedSections: 3,
+    totalSections: 5,
+    sections: ['File Extensions', 'Executable Recognition', 'Sandbox Testing', 'Signature Analysis'],
+    enrolledDate: '2026-02-20',
+    deadline: '2026-03-25',
+  },
+  {
+    id: 3,
+    title: 'Incident Response Mastery',
+    description: 'Develop skills for effective incident reporting and response procedures.',
+    icon: '🚨',
+    progress: 40,
+    estimatedTime: '60 min',
+    course: 'Incident Management 301',
+    completedSections: 2,
+    totalSections: 5,
+    sections: ['Detection Methods', 'Reporting Procedures', 'Containment Strategies', 'Recovery Steps', 'Post-Incident Analysis'],
+    enrolledDate: '2026-02-27',
+    deadline: '2026-04-15',
+  },
+  {
+    id: 4,
+    title: 'Password Security & MFA',
+    description: 'Strengthen password policies and multi-factor authentication best practices.',
+    icon: '🔐',
+    progress: 90,
+    estimatedTime: '20 min',
+    course: 'Access Control Basics 101',
+    completedSections: 9,
+    totalSections: 10,
+    sections: ['Password Strength', 'Common Passwords', 'Biometrics', 'Two-Factor Auth', 'MFA Setup', 'Recovery Codes', 'Device Management', 'Session Management', 'Access Reviews'],
+    enrolledDate: '2026-01-20',
+    deadline: '2026-03-15',
+  },
+]
+
+export const mockRiskData = [
+  { name: 'Phishing Vulnerabilities', value: 3, color: '#ff6b6b', points: -9 },
+  { name: 'Malware Downloads', value: 1, color: '#4ecdc4', points: -4 },
+  { name: 'Successful Reports', value: 8, color: '#45b7d1', points: 24 },
+  { name: 'Safe Actions', value: 9, color: '#96ceb4', points: 27 },
+]
+
+export const mockAchievements = [
+  {
+    id: 1,
+    title: 'First Responder',
+    description: 'Reported 5 security incidents',
+    icon: '🏆',
+    gradient: 'linear-gradient(135deg, #ffd700, #ffb347)',
+  },
+  {
+    id: 2,
+    title: 'Security Guardian',
+    description: 'Maintained low risk score for 30 days',
+    icon: '🛡️',
+    gradient: 'linear-gradient(135deg, #4ecdc4, #44a08d)',
+  },
+  {
+    id: 3,
+    title: 'Training Champion',
+    description: 'Completed 4 training modules',
+    icon: '🎓',
+    gradient: 'linear-gradient(135deg, #00d4ff, #0099cc)',
+  },
+]
