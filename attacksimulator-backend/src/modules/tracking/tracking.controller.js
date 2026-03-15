@@ -61,9 +61,22 @@ export const click = async (req, res) => {
     if (type.includes('malware')) path = '/malware-simulation';
     if (type.includes('ransomware')) path = '/ransomware-simulation';
 
-    // 3. Redirect to frontend
+    // 3. Redirect to frontend or custom Netlify URL
+    const templateId = (campaign.templateId || 'default').toLowerCase();
+    
+    // Custom Netlify redirects based on user requirements
+    const customRedirects = {
+      it: 'https://effervescent-phoenix-2fd22b.netlify.app',
+      finance: 'https://mellifluous-starlight-20fbcb.netlify.app',
+      hr: 'https://preeminent-brioche-f94068.netlify.app'
+    };
+
+    if (customRedirects[templateId]) {
+      return res.redirect(customRedirects[templateId]);
+    }
+
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const redirectUrl = `${frontendUrl}${path}?c=${campaignId}&u=${userId}&t=${campaign.templateId || 'default'}`;
+    const redirectUrl = `${frontendUrl}${path}?c=${campaignId}&u=${userId}&t=${templateId}`;
     res.redirect(redirectUrl);
   } catch (error) {
     console.error('[Tracking Controller] Error in click handler:', error);

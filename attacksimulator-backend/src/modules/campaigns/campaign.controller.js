@@ -14,7 +14,7 @@ export const create = async (req, res) => {
     if (!name || !type) {
       return res.status(400).json({ error: 'Name and type are required' });
     }
-    const validTypes = ['PHISHING', 'CREDENTIAL_HARVEST', 'PASSWORD_TEST', 'INCIDENT_RESPONSE'];
+    const validTypes = ['PHISHING', 'CREDENTIAL_HARVEST', 'PASSWORD_TEST', 'INCIDENT_RESPONSE', 'MALWARE', 'RANSOMWARE'];
     if (!validTypes.includes(type)) {
       return res.status(400).json({ error: `Type must be one of: ${validTypes.join(', ')}` });
     }
